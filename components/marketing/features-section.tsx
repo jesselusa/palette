@@ -7,17 +7,17 @@ export function FeaturesSection() {
     {
       icon: Layers,
       title: 'Smart composition',
-      description: 'Our AI understands product placement, lighting, and shadows to create realistic scenes.',
+      description: 'Palette understands product placement, lighting, and shadows to create realistic scenes.',
     },
     {
       icon: Zap,
       title: 'Lightning fast',
-      description: 'Generate 4 variations in under 30 seconds. Scale your content creation effortlessly.',
+      description: 'Generate multiple variations in minutes. Scale your content creation effortlessly.',
     },
     {
       icon: ImageIcon,
       title: 'High resolution',
-      description: 'Get crisp, store-ready images up to 2048x2048px suitable for any e-commerce platform.',
+      description: 'Get crisp, store-ready, high-resolution images, suitable for any e-commerce platform.',
     },
     {
       icon: LayoutGrid,

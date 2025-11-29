@@ -1,4 +1,5 @@
 import { EmailDropdown } from '@/components/dashboard/email-dropdown'
+import { DashboardMobileNav } from '@/components/dashboard/mobile-nav'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -26,13 +27,15 @@ export default async function DashboardLayout({
                 src="/logo_16x9.jpeg" 
                 alt="Palette" 
                 fill 
+                sizes="160px"
                 className="object-cover object-left"
                 priority
               />
             </div>
           </Link>
 
-          <div className="flex items-center gap-6">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-6">
             <nav className="flex items-center gap-4 text-sm font-medium text-muted-foreground">
               <Link href="/dashboard" className="hover:text-foreground">Dashboard</Link>
               <Link href="/dashboard/create" className="hover:text-foreground">Create</Link>
@@ -40,6 +43,10 @@ export default async function DashboardLayout({
             <div className="flex items-center gap-4">
               <EmailDropdown email={user.email || ''} />
             </div>
+          </div>
+          {/* Mobile Navigation */}
+          <div className="lg:hidden">
+            <DashboardMobileNav />
           </div>
         </div>
       </header>

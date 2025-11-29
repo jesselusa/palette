@@ -5,8 +5,24 @@ import { analyzeImage, constructPrompt } from '@/lib/pipeline'
 
 export const maxDuration = 60 // Set timeout to 60 seconds for long generation
 
+// Ensure FormData is properly handled
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
+    // 3. Parse Input FIRST (before any other async operations that might consume the body)
+    let formData: FormData
+    try {
+      formData = await request.formData()
+    } catch (error: any) {
+      console.error('FormData parsing error:', error)
+      return NextResponse.json(
+        { error: `Failed to parse FormData: ${error.message}` },
+        { status: 400 }
+      )
+    }
+
     // 1. Verify Auth
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -33,12 +49,10 @@ export async function POST(request: Request) {
         { status: 429 }
       )
     }
-
-    // 3. Parse Input
-    const formData = await request.formData()
+    
     const userPrompt = formData.get('prompt') as string
     const imageFile = formData.get('image') as File
-    const quality = formData.get('quality') as string || 'high' // 'high' | 'super-high'
+    const quality = formData.get('quality') as string || 'super-high' // 'high' | 'super-high'
     const quantity = parseInt(formData.get('quantity') as string || '1')
 
     if (!imageFile) {
@@ -86,19 +100,18 @@ export async function POST(request: Request) {
         const formattedPrompt = `${shortSpec} ${image_prompt}`
         
         // Pass original image along with formatted prompt to preserve product design exactly
-    // @ts-ignore
-    const result = await model.generateContent({
+        const result = await model.generateContent({
           model: modelName,
-      contents: [
-        {
-          role: 'user',
-          parts: [
+          contents: [
             {
-              inlineData: {
+              role: 'user',
+              parts: [
+                {
+                  inlineData: {
                     mimeType: mimeType,
                     data: imageBase64,
-              },
-            },
+                  },
+                },
                 { text: formattedPrompt },
               ],
             },
@@ -112,7 +125,6 @@ export async function POST(request: Request) {
         // Find the part with inlineData
         let generatedImageBase64: string | null = null;
         
-    // @ts-ignore
         const parts = result.candidates?.[0]?.content?.parts || [];
         for (const part of parts) {
           if (part.inlineData && part.inlineData.data) {
@@ -123,7 +135,6 @@ export async function POST(request: Request) {
         
         if (!generatedImageBase64) {
           console.error(`Failed to generate image ${i + 1}: No inline data found in any part.`)
-            console.log('AI Response:', JSON.stringify(result, null, 2))
           continue
         }
 
@@ -161,8 +172,12 @@ export async function POST(request: Request) {
           prompt: image_prompt,
           createdAt: insertedGen.created_at,
         })
-      } catch (genError) {
+      } catch (genError: any) {
         console.error(`Generation loop error for image ${i + 1}:`, genError)
+        // If it's the first image and it fails, throw to surface the error immediately
+        if (i === 0) {
+          throw new Error(`Failed to generate image: ${genError.message || 'Unknown error'}`)
+        }
       }
     }
 

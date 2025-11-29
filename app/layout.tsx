@@ -8,7 +8,11 @@ export const metadata: Metadata = {
   title: "Palette | AI Product Photography",
   description: "Generate professional product photography in seconds with Palette.",
   icons: {
-    icon: '/mark.png',
+    icon: [
+      { url: '/mark.png', type: 'image/png' },
+    ],
+    shortcut: '/mark.png',
+    apple: '/mark.png',
   },
 };
 

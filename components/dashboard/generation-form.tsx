@@ -25,7 +25,7 @@ export function GenerationForm() {
   const [file, setFile] = useState<File | null>(null)
   const [filePreview, setFilePreview] = useState<string | null>(null)
   const [prompt, setPrompt] = useState('')
-  const [quality, setQuality] = useState('high')
+  const [quality, setQuality] = useState('super-high')
   const [quantity, setQuantity] = useState([1])
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([])
   const [modalOpen, setModalOpen] = useState(false)
@@ -70,8 +70,8 @@ export function GenerationForm() {
       })
 
       if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'Failed to generate')
+        const error = await res.json().catch(() => ({ error: `Server error: ${res.status} ${res.statusText}` }))
+        throw new Error(error.error || `Failed to generate: ${res.status} ${res.statusText}`)
       }
 
       const data = await res.json()
@@ -82,7 +82,7 @@ export function GenerationForm() {
       setModalOpen(true)
       
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message || 'Failed to generate image')
     } finally {
       setLoading(false)
     }

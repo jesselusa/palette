@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { createClient } from '@/lib/supabase/client'
-import { Chrome, Loader2, AlertCircle } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { Chrome, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { PasswordStrength } from '@/components/auth/password-strength'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -16,17 +16,45 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [password, setPassword] = useState('')
+  const [showSignInPassword, setShowSignInPassword] = useState(false)
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
+
+  // Determine default tab based on query parameter
+  const defaultTab = searchParams.get('mode') === 'signup' ? 'signup' : 'signin'
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>(defaultTab)
+
+  // Update active tab when searchParams change
+  useEffect(() => {
+    const mode = searchParams.get('mode')
+    setActiveTab(mode === 'signup' ? 'signup' : 'signin')
+  }, [searchParams])
+
+  // Check for error query parameter from OAuth callback
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam))
+      // Clean up the URL
+      router.replace('/login', { scroll: false })
+    }
+  }, [searchParams, router])
 
   const handleOAuth = async (provider: 'google') => {
     setLoading(true)
     setError(null)
     try {
+      // Use NEXT_PUBLIC_SITE_URL if set, otherwise fallback to location.origin
+      // This allows .env.local to override for development
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || location.origin
+      const redirectTo = `${siteUrl}/auth/callback`
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${location.origin}/auth/callback`,
+          redirectTo,
         },
       })
       if (error) throw error
@@ -60,12 +88,14 @@ export function AuthForm() {
         if (error) throw error
         toast.success('Check your email to confirm your account!')
       } else {
+        // Use NEXT_PUBLIC_SITE_URL if set, otherwise fallback to location.origin
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || location.origin
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password: currentPassword,
           options: {
             // @ts-ignore
-            redirectTo: `${location.origin}/auth/callback`, // Handle redirect for email link sign ins if configured
+            redirectTo: `${siteUrl}/auth/callback`, // Handle redirect for email link sign ins if configured
           }
         })
         if (error) throw error
@@ -81,6 +111,13 @@ export function AuthForm() {
 
   return (
     <div className="w-full space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       <Button 
         variant="outline" 
         type="button" 
@@ -107,18 +144,11 @@ export function AuthForm() {
         </div>
       </div>
 
-      <Tabs defaultValue="signin" className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'signin' | 'signup')} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="signin">Sign in</TabsTrigger>
           <TabsTrigger value="signup">Sign up</TabsTrigger>
         </TabsList>
-        
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         <TabsContent value="signin">
           <form onSubmit={(e) => handleEmailAuth(e, 'signin')} className="space-y-4">
@@ -140,13 +170,29 @@ export function AuthForm() {
                   Forgot password?
                 </a>
               </div>
-              <Input 
-                id="signin-password" 
-                name="password" 
-                type="password" 
-                required 
-                disabled={loading}
-              />
+              <div className="relative">
+                <Input 
+                  id="signin-password" 
+                  name="password" 
+                  type={showSignInPassword ? 'text' : 'password'} 
+                  required 
+                  disabled={loading}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSignInPassword(!showSignInPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={loading}
+                >
+                  {showSignInPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">{showSignInPassword ? 'Hide password' : 'Show password'}</span>
+                </button>
+              </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -181,14 +227,30 @@ export function AuthForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="signup-password">Password</Label>
-              <Input 
-                id="signup-password" 
-                name="password" 
-                type="password" 
-                required 
-                disabled={loading}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="relative">
+                <Input 
+                  id="signup-password" 
+                  name="password" 
+                  type={showSignUpPassword ? 'text' : 'password'} 
+                  required 
+                  disabled={loading}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSignUpPassword(!showSignUpPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={loading}
+                >
+                  {showSignUpPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">{showSignUpPassword ? 'Hide password' : 'Show password'}</span>
+                </button>
+              </div>
               <PasswordStrength password={password} />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

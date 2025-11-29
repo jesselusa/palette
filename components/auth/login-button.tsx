@@ -7,10 +7,13 @@ import { Chrome } from 'lucide-react'
 export function LoginButton() {
   const handleLogin = async () => {
     const supabase = createClient()
+    // Use NEXT_PUBLIC_SITE_URL if set, otherwise fallback to location.origin
+    // This allows .env.local to override for development
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || location.origin
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${location.origin}/auth/callback`,
+        redirectTo: `${siteUrl}/auth/callback`,
       },
     })
   }

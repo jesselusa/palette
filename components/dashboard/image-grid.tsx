@@ -10,6 +10,7 @@ import { useState } from 'react'
 interface GeneratedImage {
   id: string
   imageUrl: string | null
+  originalImageUrl: string | null
   prompt: string
   createdAt: string
 }

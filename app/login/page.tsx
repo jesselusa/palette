@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { FadeIn } from '@/components/marketing/fade-in'
 import { Metadata } from 'next'
 import Image from 'next/image'
+import { Suspense } from 'react'
 
 export const metadata: Metadata = {
   title: 'Login - Palette',
@@ -17,9 +18,10 @@ export default function LoginPage() {
         <Link href="/" className="flex items-center gap-2 font-semibold text-xl">
           <div className="relative h-16 w-48">
             <Image 
-              src="/logo.png"  
+              src="/logo_16x9.jpeg"  
               alt="Palette" 
               fill 
+              sizes="160px"
               className="object-contain object-left"
               priority
             />
@@ -32,7 +34,7 @@ export default function LoginPage() {
               Create professional product photography in seconds
             </h2>
             <p className="text-muted-foreground text-lg">
-              Join thousands of e-commerce merchants using AI to boost their conversion rates and save on photography costs.
+              Create high-quality product photos in minutes. Save time and money with AI-powered photography that transforms your products.
             </p>
           </FadeIn>
         </div>
@@ -49,9 +51,10 @@ export default function LoginPage() {
             <Link href="/" className="inline-flex items-center gap-2 font-semibold text-xl">
               <div className="relative h-16 w-48">
                 <Image 
-                  src="/logo.png" 
+                  src="/logo_16x9.jpeg" 
                   alt="Palette" 
                   fill 
+                  sizes="160px"
                   className="object-contain object-center"
                   priority
                 />
@@ -68,15 +71,17 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <AuthForm />
+          <Suspense fallback={<div>Loading...</div>}>
+            <AuthForm />
+          </Suspense>
 
           <p className="px-8 text-center text-sm text-muted-foreground">
             By clicking continue, you agree to our{" "}
-            <Link href="#" className="underline underline-offset-4 hover:text-primary">
+            <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="#" className="underline underline-offset-4 hover:text-primary">
+            <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
               Privacy Policy
             </Link>
             .

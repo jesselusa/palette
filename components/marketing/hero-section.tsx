@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { FadeIn } from './fade-in'
+import { SmoothScrollLink } from './smooth-scroll-link'
 
 export function HeroSection() {
   return (
@@ -29,15 +30,15 @@ export function HeroSection() {
         
         <FadeIn delay={0.4} className="w-full sm:w-auto">
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
-            <Link href="/login" className="w-full sm:w-auto">
+            <Link href="/login?mode=signup" className="w-full sm:w-auto">
               <Button size="lg" className="w-full gap-2 h-12 text-base">
                 Get started for free
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 text-base">
+            <SmoothScrollLink href="#gallery" variant="outline" size="lg" className="w-full sm:w-auto h-12 text-base">
               View examples
-            </Button>
+            </SmoothScrollLink>
           </div>
         </FadeIn>
       </div>

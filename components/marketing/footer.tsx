@@ -10,9 +10,10 @@ export function Footer() {
             <div className="flex items-center gap-2 font-semibold text-lg">
               <div className="relative h-12 w-40">
                 <Image 
-                  src="/logo.png" 
+                  src="/logo_16x9.jpeg" 
                   alt="Palette" 
                   fill 
+                  sizes="160px"
                   className="object-contain object-left"
                 />
               </div>
@@ -36,7 +37,6 @@ export function Footer() {
             <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
               <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
               <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-              <Link href="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link>
             </nav>
           </div>
         </div>

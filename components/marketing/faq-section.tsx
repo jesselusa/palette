@@ -12,7 +12,7 @@ export function FAQSection() {
     },
     {
       question: 'Can I use photos taken with my phone?',
-      answer: 'Absolutely! In fact, that\'s what our AI is best at. Take a clear photo of your product in good lighting, upload it, and we\'ll handle the rest.',
+      answer: 'Absolutely! In fact, that\'s what Palette is best at. Take a clear photo of your product in good lighting, upload it, and we\'ll handle the rest.',
     },
   ]
 

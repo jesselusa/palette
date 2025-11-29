@@ -11,12 +11,12 @@ export function HowItWorks() {
     {
       icon: Wand2,
       title: 'Describe scene',
-      description: 'Tell our AI where you want to place your product (e.g., "on a marble table in sunlight").',
+      description: 'Tell Palette where you want to place your product (e.g., "on a marble table in sunlight").',
     },
     {
       icon: Download,
       title: 'Download & sell',
-      description: 'Get 4 professional variations in seconds. Download high-res images ready for your store.',
+      description: 'Get professional variations in seconds. Download high-res images ready for your store.',
     },
   ]
 

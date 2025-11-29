@@ -2,13 +2,15 @@ import { HeroSection } from '@/components/marketing/hero-section'
 import { HowItWorks } from '@/components/marketing/how-it-works'
 import { BeforeAfterGallery } from '@/components/marketing/before-after-gallery'
 import { FeaturesSection } from '@/components/marketing/features-section'
-import { StatsSection } from '@/components/marketing/stats-section'
 import { FAQSection } from '@/components/marketing/faq-section'
 import { Footer } from '@/components/marketing/footer'
+import { MobileNav } from '@/components/marketing/mobile-nav'
+import { OAuthRedirectHandler } from '@/components/auth/oauth-redirect-handler'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
+import { Suspense } from 'react'
 
 export const metadata: Metadata = {
   title: 'Palette | AI Product Photography Generator',
@@ -24,6 +26,9 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
+      <Suspense fallback={null}>
+        <OAuthRedirectHandler />
+      </Suspense>
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between">
@@ -33,25 +38,31 @@ export default function Home() {
                 src="/logo_16x9.jpeg" 
                 alt="Palette" 
                 fill 
+                sizes="160px"
                 className="object-cover object-left"
                 priority
               />
             </div>
           </Link>
-          <nav className="flex items-center gap-4">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-4">
             <Link href="/login">
               <Button variant="ghost" size="sm">Login</Button>
             </Link>
-            <Link href="/login">
+            <Link href="/login?mode=signup">
               <Button size="sm">Get started</Button>
             </Link>
           </nav>
+          {/* Mobile Navigation */}
+          <div className="lg:hidden">
+            <MobileNav />
+          </div>
         </div>
       </header>
 
       <main className="flex-1">
         <HeroSection />
-        <StatsSection />
+        {/* <StatsSection /> */}
         <HowItWorks />
         <div id="gallery">
           <BeforeAfterGallery />
@@ -68,9 +79,9 @@ export default function Home() {
               Ready to transform your product photos?
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl">
-              Join thousands of e-commerce brands creating professional imagery with AI.
+              Create high-quality product photos in minutes. Save time and money with AI-powered photography.
             </p>
-            <Link href="/login">
+            <Link href="/login?mode=signup">
               <Button size="lg" className="h-12 px-8 text-lg">
                 Start generating for free
               </Button>

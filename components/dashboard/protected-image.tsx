@@ -55,7 +55,7 @@ export function ProtectedImage({ src, alt, className, sizes, onDownload }: Prote
           draggable={false}
           onContextMenu={(e) => e.preventDefault()}
         />
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none hidden md:flex">
           <div className="pointer-events-auto">
             <Button
               size="sm"

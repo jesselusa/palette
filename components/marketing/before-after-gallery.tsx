@@ -1,23 +1,19 @@
-import { Card } from '@/components/ui/card'
 import Image from 'next/image'
 import { FadeIn } from './fade-in'
 
 export function BeforeAfterGallery() {
   const examples = [
     {
-      before: '/placeholder-product.jpg', // We'll use a div placeholder if image fails
-      after: '/placeholder-generated.jpg',
-      label: 'Perfume Bottle',
+      image: '/example_print.png',
+      label: 'Interior design',
     },
     {
-      before: '/placeholder-shoe.jpg',
-      after: '/placeholder-generated-shoe.jpg',
-      label: 'Sneakers',
+      image: '/example_bracelet.png',
+      label: 'Jewelry',
     },
     {
-      before: '/placeholder-watch.jpg',
-      after: '/placeholder-generated-watch.jpg',
-      label: 'Luxury Watch',
+      image: '/example_shirt.png',
+      label: 'Apparel',
     },
   ]
 
@@ -39,11 +35,13 @@ export function BeforeAfterGallery() {
           <FadeIn key={i} delay={i * 0.2}>
             <div className="group relative">
               <div className="aspect-[4/5] relative rounded-xl overflow-hidden border bg-muted">
-                {/* We simulate the comparison for now with a split view or just showing the result */}
-                <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center text-muted-foreground">
-                  {/* Placeholder since we don't have actual images yet */}
-                  <span className="text-sm">Example Image {i + 1}</span>
-                </div>
+                <Image
+                  src={ex.image}
+                  alt={ex.label}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
                 
                 {/* Overlay label */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
