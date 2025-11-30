@@ -9,6 +9,10 @@ export const maxDuration = 60 // Set timeout to 60 seconds for long generation
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+// Vercel Hobby plan has a 4.5MB body size limit for API routes
+// Setting to 4MB to provide a safe buffer
+const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4MB
+
 export async function POST(request: Request) {
   try {
     // 3. Parse Input FIRST (before any other async operations that might consume the body)
@@ -17,6 +21,13 @@ export async function POST(request: Request) {
       formData = await request.formData()
     } catch (error: any) {
       console.error('FormData parsing error:', error)
+      // Check if it's a size-related error
+      if (error.message?.includes('size') || error.message?.includes('413') || error.message?.includes('too large')) {
+        return NextResponse.json(
+          { error: `Image is too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB. Please compress your image and try again.` },
+          { status: 413 }
+        )
+      }
       return NextResponse.json(
         { error: `Failed to parse FormData: ${error.message}` },
         { status: 400 }
@@ -58,6 +69,22 @@ export async function POST(request: Request) {
     if (!imageFile) {
       return NextResponse.json(
         { error: 'Missing image' },
+        { status: 400 }
+      )
+    }
+
+    // Validate file size
+    if (imageFile.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: `Image is too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB. Please compress your image and try again.` },
+        { status: 413 }
+      )
+    }
+
+    // Validate file type
+    if (!imageFile.type.startsWith('image/')) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Please upload an image file.' },
         { status: 400 }
       )
     }

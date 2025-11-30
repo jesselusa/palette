@@ -24,6 +24,7 @@ export function GenerationForm() {
   const [loading, setLoading] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [filePreview, setFilePreview] = useState<string | null>(null)
+  const [fileSize, setFileSize] = useState<number | null>(null)
   const [prompt, setPrompt] = useState('')
   const [quality, setQuality] = useState('super-high')
   const [quantity, setQuantity] = useState([1])
@@ -39,8 +40,47 @@ export function GenerationForm() {
     }
   }, [filePreview])
 
+  // Vercel Hobby plan has a 4.5MB body size limit for API routes
+  // Setting to 4MB to provide a safe buffer
+  const MAX_FILE_SIZE = 4 * 1024 * 1024 // 4MB
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null
+    
+    if (selectedFile) {
+      // Validate file size
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        const maxSizeMB = MAX_FILE_SIZE / (1024 * 1024)
+        const fileSizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2)
+        toast.error(`Image is too large (${fileSizeMB}MB). Maximum size is ${maxSizeMB}MB. Please compress your image and try again.`)
+        e.target.value = '' // Clear the input
+        setFile(null)
+        setFilePreview(null)
+        setFileSize(null)
+        return
+      }
+
+      // Validate file type
+      if (!selectedFile.type.startsWith('image/')) {
+        toast.error('Please select a valid image file.')
+        e.target.value = '' // Clear the input
+        setFile(null)
+        setFilePreview(null)
+        setFileSize(null)
+        return
+      }
+
+      setFileSize(selectedFile.size)
+    } else {
+      setFileSize(null)
+    }
+
     setFile(selectedFile)
 
     if (selectedFile) {
@@ -70,8 +110,30 @@ export function GenerationForm() {
       })
 
       if (!res.ok) {
-        const error = await res.json().catch(() => ({ error: `Server error: ${res.status} ${res.statusText}` }))
-        throw new Error(error.error || `Failed to generate: ${res.status} ${res.statusText}`)
+        // Handle 413 (Payload Too Large) specifically
+        if (res.status === 413) {
+          // Try to get error message from response, but if body is too large, use default message
+          let errorMessage = `Image is too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB. Please compress your image and try again.`
+          try {
+            const errorData = await res.json()
+            if (errorData.error) {
+              errorMessage = errorData.error
+            }
+          } catch {
+            // Response body might not be readable for 413 errors, use default message
+          }
+          throw new Error(errorMessage)
+        }
+        
+        // For other errors, try to parse JSON response
+        let errorMessage = `Server error: ${res.status} ${res.statusText}`
+        try {
+          const error = await res.json()
+          errorMessage = error.error || errorMessage
+        } catch {
+          // If response body can't be parsed, use status text
+        }
+        throw new Error(errorMessage)
       }
 
       const data = await res.json()
@@ -119,6 +181,17 @@ export function GenerationForm() {
                             <div className="absolute bottom-4 right-4 bg-black/75 text-white text-xs px-3 py-1.5 rounded-full z-20 pointer-events-none font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                               Click to change
                             </div>
+                            {fileSize !== null && (
+                              <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-medium z-20 ${
+                                fileSize > MAX_FILE_SIZE 
+                                  ? 'bg-red-500/90 text-white' 
+                                  : fileSize > MAX_FILE_SIZE * 0.9
+                                  ? 'bg-yellow-500/90 text-white'
+                                  : 'bg-green-500/90 text-white'
+                              }`}>
+                                {formatFileSize(fileSize)}
+                              </div>
+                            )}
                          </div>
                       ) : (
                         <div className="flex flex-col items-center gap-4 text-muted-foreground p-6 text-center">

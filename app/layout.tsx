@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const dmSans = DM_Sans({ subsets: ["latin"] });
@@ -23,7 +24,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={dmSans.className}>{children}</body>
+      <body className={dmSans.className}>
+        {children}
+        <Toaster 
+          position="top-center"
+          offset="56px"
+          toastOptions={{
+            className: 'mt-2',
+          }}
+        />
+      </body>
     </html>
   );
 }
