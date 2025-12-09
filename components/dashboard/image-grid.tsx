@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -13,36 +12,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Plus, Download, Trash2, X, Loader2 } from 'lucide-react'
+import { Plus, Download, Trash2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { ProtectedImage } from '@/components/dashboard/protected-image'
 import { ImageDetailModal } from '@/components/dashboard/image-detail-modal'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-
-interface GeneratedImage {
-  id: string
-  imageUrl: string | null
-  originalImageUrl: string | null
-  prompt: string
-  createdAt: string
-}
+import type { GeneratedImage, BulkActions } from '@/types/dashboard'
 
 interface ImageGridProps {
   images: GeneratedImage[]
   isSelectionMode: boolean
   onSelectionModeChange: (enabled: boolean) => void
   onSelectionCountChange?: (count: number) => void
-  onBulkActionsReady?: (actions: {
-    onClear: () => void
-    onDownload: () => void
-    onDelete: () => void
-    onSelectAll: () => void
-    isAllSelected: boolean
-    isDeleting: boolean
-    isDownloading: boolean
-  } | null) => void
+  onBulkActionsReady?: (actions: BulkActions | null) => void
 }
 
 export function ImageGrid({ images, isSelectionMode, onSelectionModeChange, onSelectionCountChange, onBulkActionsReady }: ImageGridProps) {
@@ -65,24 +49,6 @@ export function ImageGrid({ images, isSelectionMode, onSelectionModeChange, onSe
     onSelectionCountChange?.(selectedIds.size)
   }, [selectedIds.size, onSelectionCountChange])
 
-  // Provide bulk actions to parent
-  useEffect(() => {
-    if (isSelectionMode && onBulkActionsReady) {
-      onBulkActionsReady({
-        onClear: () => setSelectedIds(new Set()),
-        onDownload: handleBulkDownload,
-        onDelete: handleBulkDeleteClick,
-        onSelectAll: toggleSelectAll,
-        isAllSelected: selectedIds.size === images.length && images.length > 0,
-        isDeleting,
-        isDownloading,
-      })
-    } else if (!isSelectionMode && onBulkActionsReady) {
-      onBulkActionsReady(null)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSelectionMode, selectedIds.size, images.length, isDeleting, isDownloading])
-
   const toggleSelection = (id: string) => {
     const newSelection = new Set(selectedIds)
     if (newSelection.has(id)) {
@@ -93,26 +59,29 @@ export function ImageGrid({ images, isSelectionMode, onSelectionModeChange, onSe
     setSelectedIds(newSelection)
   }
 
-  const toggleSelectAll = () => {
-    if (selectedIds.size === images.length) {
-      setSelectedIds(new Set())
-    } else {
-      setSelectedIds(new Set(images.map(img => img.id)))
-    }
-  }
+  const toggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      if (prev.size === images.length) {
+        return new Set()
+      } else {
+        return new Set(images.map(img => img.id))
+      }
+    })
+  }, [images])
 
-  const handleBulkDeleteClick = () => {
+  const handleBulkDeleteClick = useCallback(() => {
     if (selectedIds.size === 0) return
     setShowDeleteDialog(true)
-  }
+  }, [selectedIds.size])
 
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = useCallback(async () => {
     setIsDeleting(true)
     try {
+      const idsToDelete = Array.from(selectedIds)
       const res = await fetch('/api/generations/bulk', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+        body: JSON.stringify({ ids: idsToDelete }),
       })
 
       if (!res.ok) {
@@ -126,14 +95,15 @@ export function ImageGrid({ images, isSelectionMode, onSelectionModeChange, onSe
       setShowDeleteDialog(false)
       onSelectionModeChange(false)
       router.refresh()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to delete images')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete images'
+      toast.error(message)
     } finally {
       setIsDeleting(false)
     }
-  }
+  }, [selectedIds, onSelectionModeChange, router])
 
-  const handleBulkDownload = async () => {
+  const handleBulkDownload = useCallback(async () => {
     if (selectedIds.size === 0) return
 
     setIsDownloading(true)
@@ -156,19 +126,36 @@ export function ImageGrid({ images, isSelectionMode, onSelectionModeChange, onSe
           // Small delay between downloads to avoid browser blocking
           await new Promise(resolve => setTimeout(resolve, 100))
         } catch (error) {
-          console.error(`Failed to download image ${img.id}:`, error)
+          // Silently continue with other downloads if one fails
         }
       }
 
       toast.success(`Downloaded ${selectedImages.length} image${selectedImages.length > 1 ? 's' : ''}`)
       setSelectedIds(new Set())
       onSelectionModeChange(false)
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to download images')
     } finally {
       setIsDownloading(false)
     }
-  }
+  }, [selectedIds, images, onSelectionModeChange])
+
+  // Provide bulk actions to parent
+  useEffect(() => {
+    if (isSelectionMode && onBulkActionsReady) {
+      onBulkActionsReady({
+        onClear: () => setSelectedIds(new Set()),
+        onDownload: handleBulkDownload,
+        onDelete: handleBulkDeleteClick,
+        onSelectAll: toggleSelectAll,
+        isAllSelected: selectedIds.size === images.length && images.length > 0,
+        isDeleting,
+        isDownloading,
+      })
+    } else if (!isSelectionMode && onBulkActionsReady) {
+      onBulkActionsReady(null)
+    }
+  }, [isSelectionMode, selectedIds.size, images.length, isDeleting, isDownloading, onBulkActionsReady, handleBulkDownload, handleBulkDeleteClick, toggleSelectAll])
 
   const handleCardClick = (gen: GeneratedImage, event: React.MouseEvent) => {
     // Don't open modal if clicking checkbox or if in selection mode
@@ -198,10 +185,11 @@ export function ImageGrid({ images, isSelectionMode, onSelectionModeChange, onSe
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <Button
               onClick={handleBulkDelete}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              variant="outline"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               {isDeleting ? (
                 <>
@@ -211,11 +199,10 @@ export function ImageGrid({ images, isSelectionMode, onSelectionModeChange, onSe
               ) : (
                 'Delete'
               )}
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
 
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full min-w-0">
         {/* Create New Card */}
