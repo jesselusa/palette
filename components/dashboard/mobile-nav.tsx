@@ -46,6 +46,11 @@ export function DashboardMobileNav() {
               Create
             </Button>
           </Link>
+          <Link href="/dashboard/credits" onClick={() => setOpen(false)}>
+            <Button variant="ghost" className="w-full justify-start h-12 px-4 text-base font-medium">
+              Credits
+            </Button>
+          </Link>
           <Link href="/dashboard/account" onClick={() => setOpen(false)}>
             <Button variant="ghost" className="w-full justify-start h-12 px-4 text-base font-medium">
               Account
