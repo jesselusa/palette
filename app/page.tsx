@@ -2,6 +2,7 @@ import { HeroSection } from '@/components/marketing/hero-section'
 import { HowItWorks } from '@/components/marketing/how-it-works'
 import { BeforeAfterGallery } from '@/components/marketing/before-after-gallery'
 import { FeaturesSection } from '@/components/marketing/features-section'
+import { PricingSection } from '@/components/marketing/pricing-section'
 import { FAQSection } from '@/components/marketing/faq-section'
 import { Footer } from '@/components/marketing/footer'
 import { MobileNav } from '@/components/marketing/mobile-nav'
@@ -32,18 +33,18 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <div className="relative h-12 w-40">
-              <Image 
-                src="/logo_16x9.jpeg" 
-                alt="Palette" 
-                fill 
-                sizes="160px"
-                className="object-cover object-left"
-                priority
-              />
-            </div>
-          </Link>
+            <Link href="/" className="flex items-center gap-2 font-semibold">
+              <div className="relative h-8 w-32">
+                <Image 
+                  src="/logo_16x9.svg" 
+                  alt="Palette" 
+                  fill 
+                  sizes="128px"
+                  className="object-contain object-left"
+                  priority
+                />
+              </div>
+            </Link>
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-4">
             <Link href="/login">
@@ -70,6 +71,7 @@ export default function Home() {
         <div id="features">
           <FeaturesSection />
         </div>
+        <PricingSection />
         <FAQSection />
         
         {/* Final CTA Section */}

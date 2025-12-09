@@ -26,9 +26,20 @@ export function SmoothScrollLink({ href, children, variant, size, className }: S
     }
   }
 
+  // Extract width and height classes from className to apply to Button
+  const widthMatch = className?.match(/w-\[?\w+\]?/)?.[0]
+  const heightMatch = className?.match(/h-\[?\w+\]?/)?.[0]
+  const textBaseMatch = className?.match(/text-base/)?.[0]
+  
+  const buttonClasses = [
+    widthMatch || 'w-full',
+    heightMatch || '',
+    textBaseMatch || ''
+  ].filter(Boolean).join(' ')
+
   return (
     <a href={href} onClick={handleClick} className={className}>
-      <Button variant={variant} size={size} className="w-full">
+      <Button variant={variant} size={size} className={buttonClasses}>
         {children}
       </Button>
     </a>

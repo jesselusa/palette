@@ -31,12 +31,12 @@ export function HeroSection() {
         <FadeIn delay={0.4} className="w-full sm:w-auto">
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
             <Link href="/login?mode=signup" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full gap-2 h-12 text-base">
+              <Button size="lg" className="w-full sm:w-[200px] gap-2 h-12 text-base justify-center">
                 Get started for free
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <SmoothScrollLink href="#gallery" variant="outline" size="lg" className="w-full sm:w-auto h-12 text-base">
+            <SmoothScrollLink href="#gallery" variant="outline" size="lg" className="w-full sm:w-[200px] h-12 text-base">
               View examples
             </SmoothScrollLink>
           </div>

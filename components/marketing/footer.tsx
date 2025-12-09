@@ -10,7 +10,7 @@ export function Footer() {
             <div className="flex items-center gap-2 font-semibold text-lg">
               <div className="relative h-12 w-40">
                 <Image 
-                  src="/logo_16x9.jpeg" 
+                  src="/logo_16x9.svg" 
                   alt="Palette" 
                   fill 
                   sizes="160px"

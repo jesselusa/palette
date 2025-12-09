@@ -18,7 +18,7 @@ export default function LoginPage() {
         <Link href="/" className="flex items-center gap-2 font-semibold text-xl">
           <div className="relative h-16 w-48">
             <Image 
-              src="/logo_16x9.jpeg"  
+              src="/logo_16x9.svg"  
               alt="Palette" 
               fill 
               sizes="160px"
@@ -51,7 +51,7 @@ export default function LoginPage() {
             <Link href="/" className="inline-flex items-center gap-2 font-semibold text-xl">
               <div className="relative h-16 w-48">
                 <Image 
-                  src="/logo_16x9.jpeg" 
+                  src="/logo_16x9.svg" 
                   alt="Palette" 
                   fill 
                   sizes="160px"

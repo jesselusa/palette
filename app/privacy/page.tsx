@@ -16,13 +16,13 @@ export default function PrivacyPage() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <div className="relative h-12 w-40">
+            <div className="relative h-8 w-32">
               <Image 
-                src="/logo_16x9.jpeg" 
+                src="/logo_16x9.svg" 
                 alt="Palette" 
                 fill 
-                sizes="160px"
-                className="object-cover object-left"
+                sizes="128px"
+                className="object-contain object-left"
                 priority
               />
             </div>
