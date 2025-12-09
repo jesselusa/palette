@@ -85,8 +85,9 @@ export async function DELETE(request: Request) {
         } else {
           deletedIds.push(generation.id)
         }
-      } catch (error: any) {
-        errors.push(`Error processing generation ${generation.id}: ${error.message}`)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        errors.push(`Error processing generation ${generation.id}: ${message}`)
       }
     }
 
@@ -103,10 +104,11 @@ export async function DELETE(request: Request) {
       failed: errors.length,
       errors: errors.length > 0 ? errors : undefined,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Bulk delete generation error:', error)
+    const message = error instanceof Error ? error.message : 'Failed to delete generations'
     return NextResponse.json(
-      { error: error.message || 'Failed to delete generations' },
+      { error: message },
       { status: 500 }
     )
   }

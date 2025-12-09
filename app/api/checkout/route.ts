@@ -11,7 +11,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { priceId } = await request.json()
+    // Use the price ID from environment variable (10 credits for $9.99)
+    const priceId = process.env.STRIPE_CREDITS_PRICE_ID
+
+    if (!priceId) {
+      return NextResponse.json(
+        { error: 'Stripe price ID not configured' },
+        { status: 500 }
+      )
+    }
 
     const session = await stripe.checkout.sessions.create({
       billing_address_collection: 'auto',
@@ -22,10 +30,13 @@ export async function POST(request: Request) {
         },
       ],
       mode: 'payment',
-      success_url: `${request.headers.get('origin')}/dashboard?success=true`,
-      cancel_url: `${request.headers.get('origin')}/dashboard?canceled=true`,
+      allow_promotion_codes: true,
+      success_url: `${request.headers.get('origin')}/dashboard/credits?success=true`,
+      cancel_url: `${request.headers.get('origin')}/dashboard/credits?canceled=true`,
       metadata: {
         userId: user.id,
+        priceId: priceId,
+        creditsAmount: '10',
       },
     })
 
