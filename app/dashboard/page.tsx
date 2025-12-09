@@ -1,9 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import Link from 'next/link'
 import { EmptyState } from '@/components/dashboard/empty-state'
-import { ImageGrid } from '@/components/dashboard/image-grid'
+import { DashboardContent } from '@/components/dashboard/dashboard-content'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -50,24 +47,6 @@ export default async function DashboardPage() {
   )).filter((gen): gen is { id: string; imageUrl: string; originalImageUrl: string | null; prompt: string; createdAt: string } => gen !== null)
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">My products</h1>
-        {generationsWithUrls.length > 0 && (
-          <Link href="/dashboard/create">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              New image
-            </Button>
-          </Link>
-        )}
-      </div>
-
-      {generationsWithUrls.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <ImageGrid images={generationsWithUrls} />
-      )}
-    </div>
+    <DashboardContent images={generationsWithUrls} />
   )
 }
